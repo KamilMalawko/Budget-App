@@ -5,7 +5,7 @@ function displayExpenses() {
 	const tableBody = document.getElementById("expenseTableBody");
 	tableBody.innerHTML = "";
 
-	expenses.forEach(exp => {
+	expenses.forEach((exp, index) => {
 
 		// Date format set to DD/MM/YYYY
 		console.log("Date raw: ", exp.date);
@@ -34,9 +34,44 @@ function displayExpenses() {
 			<td>${exp.description}</td>
 			<td>${formatted_date}</td>
 			<td>${formatted_time}</td>
+			<td><button class="edit-button" data-index="${index}">Edit</button></td>
+			<td><button class="delete-button" data-index="${index}">Delete</button></td>
 		`;
 
 		tableBody.appendChild(row);
 	});
+
+	// Edit existing expenses
+	document.querySelectorAll(".edit-button").forEach(button => {
+		button.addEventListener("click", (e) => {
+			const index = e.target.getAttribute("data-index");
+			const expenses = JSON.parse(localStorage.getItem("expenses") || "[]");
+			const expense = expenses[index];
+
+			// Set data in a form
+			document.querySelector('input[name="NewExpense.Name"]').value = expense.name;
+			document.querySelector('input[name="NewExpense.Amount"]').value = expense.amount;
+			document.querySelector('input[name="NewExpense.Category"]').value = expense.category;
+			document.querySelector('input[name="NewExpense.Description"]').value = expense.description;
+			document.querySelector('input[name="NewExpense.Date"]').value = expense.date;
+
+			// Remember which element is being edited
+			document.getElementById("expenseForm").setAttribute("data-edit-index", index);
+			});
+	});
+
+	//Delete expenses
+	document.querySelectorAll(".delete-button").forEach(button => {
+		button.addEventListener("click", (e) => {
+			const index = e.target.getAttribute("data-index");
+			let expenses = JSON.parse(localStorage.getItem("expenses") || "[]");
+
+			if (confirm("Are you sure you want to delete an expense?")) {
+				expenses.splice(index, 1);
+				localStorage.setItem("expenses", JSON.stringify(expenses));
+				displayExpenses();
+			}
+		});
+	});
 }
-displayExpenses();
+//displayExpenses();
